@@ -1,3 +1,5 @@
+= Run the Application =
+
 == Run the Manager (from the msn folder) ==
 {{{
 java -cp jade.jar;msnJ2se.jar jade.Boot -gui -nomtp manager:msn.manager.ManagerAgent
