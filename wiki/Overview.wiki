@@ -2,7 +2,7 @@
 
 = Application Functionalities =
 
-Main functionalities:
+== Main functionalities:==
   * Discovery new users on the network
   * Manage friends
   * Manage personal wall
@@ -10,3 +10,14 @@ Main functionalities:
   * View friend's wall
   * View user's profile
   * Search content on friends nodes
+
+== Application Architecture ==
+  * The logical comunication is between devices
+  * Fisically the agents run in the JADE container
+  * Manager listen at the container events and informs the devices (Joins/Lefts)
+  * All the others functionalities (search, friend management, friend discovery...) are implemented on the device side
+
+== LogIn and LogOut ==
+  * Subscription to the server manager
+  * Server manager informs the client if a user join/leave the network
+  * Device keeps track of the users on the network
