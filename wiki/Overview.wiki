@@ -1,0 +1,12 @@
+#summary One-sentence summary of this page.
+
+= Application Functionalities =
+
+Main functionalities:
+*Discovery new users on the network
+*Manage friends
+*Manage personal wall
+*Manage personal profile
+*View friend's wall
+*View user's profile
+*Search content on friends nodes
