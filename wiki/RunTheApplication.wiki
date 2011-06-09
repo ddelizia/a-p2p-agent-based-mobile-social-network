@@ -1,7 +1,6 @@
 == Run the Manager (from the msn folder) ==
 {{{
-java -cp jade.jar;msnJ2se.jar jade.Boot -gui -nomtp
-manager:msn.manager.ManagerAgent
+java -cp jade.jar;msnJ2se.jar jade.Boot -gui -nomtp manager:msn.manager.ManagerAgent
 }}}
 
 == Run the Client (on the emulator) ==
@@ -17,7 +16,8 @@ LEAP-host: localhost
 with 
 {{{
 LEAP-host: your_ip
-}}} in the 
+}}} 
+in the 
 {{{
 file msn.manifest
 }}}
