@@ -19,9 +19,9 @@ with
 {{{
 LEAP-host: your_ip
 }}} 
-in the 
+in the file
 {{{
-file msn.manifest
+msn.manifest
 }}}
 
 == Start the application JADE-Msn insert the name and start to use it!! ==
