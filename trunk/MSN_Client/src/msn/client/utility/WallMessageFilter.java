@@ -15,16 +15,12 @@ public class WallMessageFilter implements javax.microedition.rms.RecordFilter {
 	public WallMessageFilter(String tags){
 		super();
 		this.tags=new ArrayList();
-		System.out.println("Wall message filter started");
 		String s=UtilityData.replaceAll(tags," ", "").toUpperCase();
-		System.out.println("String: "+s);
 		StringTokenizer st=new StringTokenizer(s,",");
 		while (st.hasMoreTokens()){
 			String token=st.nextToken();
-			System.out.println("token: "+token);
 			this.tags.add(token);
 		}
-		System.out.println("Ended");
 	}
 
 	public boolean matches(byte[] arg0) {

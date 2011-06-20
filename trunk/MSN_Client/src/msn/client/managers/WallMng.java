@@ -9,7 +9,7 @@ import msn.client.MSNAgent;
 import msn.client.Navigator;
 import msn.client.Wall;
 import msn.client.WallMessage;
-import msn.client.gui.GuiCommandListener;
+import msn.client.gui.GuiManager;
 import msn.client.utility.UtilityData;
 import msn.client.utility.UtilityDatastore;
 import msn.ontology.MessageTicket;
@@ -18,6 +18,8 @@ public class WallMng {
 	private Wall wall;
 	
 	public Wall getWall() {
+		if (wall==null)
+			wall=new Wall();
 		return wall;
 	}
 
@@ -44,7 +46,7 @@ public class WallMng {
     }
     
     public void add (WallMessage wm,boolean isMy){
-    	wall.getWallMessages().add(wm);
+    	getWall().getWallMessages().add(wm);
     	if (isMy)
     		UtilityDatastore.saveWallMessage(wm);
     }
@@ -73,7 +75,7 @@ public class WallMng {
 
 	
 	  //REQUEST    
-    public void obtaingWall(String destination,MSNAgent myAgent, GuiCommandListener menuGui){
+    public void obtaingWall(String destination,MSNAgent myAgent, GuiManager menuGui){
         //Profile p = null;
         try {
             Runnable r = new RequestingWall(destination, myAgent, menuGui);
@@ -90,9 +92,9 @@ public class WallMng {
 
         String destination;
         MSNAgent myAgent;
-        GuiCommandListener menuGui;
+        GuiManager menuGui;
 
-        public RequestingWall(String destination, MSNAgent myAgent, GuiCommandListener menuGui) {
+        public RequestingWall(String destination, MSNAgent myAgent, GuiManager menuGui) {
             super();
             this.destination=destination;
             this.myAgent=myAgent;
@@ -101,15 +103,13 @@ public class WallMng {
 
         public void run() {
             MessageTicket notification=new MessageTicket(destination, MSNAgent.WALL_REQUEST ,MessageTicket.NULLCONT, new byte[0]);
-        	System.out.println("Richiedo il muro");
-        	System.out.println(notification);
             myAgent.sendMessage(notification.getDestinationRequest(),MSNAgent.WALL_REQUEST, MSNAgent.PROTOCOL_WALL, notification,true);
             
         }
     }
     
     //REQUEST    
-    public void obtaingFile(String destinationRequest,MSNAgent myAgent, GuiCommandListener menuGui,String path){
+    public void obtaingFile(String destinationRequest,MSNAgent myAgent, GuiManager menuGui,String path){
         //Profile p = null;
         try {
             Runnable r = new RequestingFile(destinationRequest, myAgent, menuGui, path);
@@ -126,10 +126,10 @@ public class WallMng {
 
         String destinationRequest;
         MSNAgent myAgent;
-        GuiCommandListener menuGui;
+        GuiManager menuGui;
         String path;
 
-        public RequestingFile(String destinationRequest, MSNAgent myAgent, GuiCommandListener menuGui, String path) {
+        public RequestingFile(String destinationRequest, MSNAgent myAgent, GuiManager menuGui, String path) {
             super();
             this.destinationRequest=destinationRequest;
             this.myAgent=myAgent;
@@ -139,15 +139,13 @@ public class WallMng {
 
         public void run() {
             MessageTicket notification=new MessageTicket(destinationRequest, MSNAgent.WALLFILE_REQUEST ,path, new byte[0]);
-        	System.out.println("Richiedo il file");
-        	System.out.println(notification);
             myAgent.sendMessage(notification.getDestinationRequest(),MSNAgent.WALLFILE_REQUEST, MSNAgent.PROTOCOL_WALLFILE, notification,true);
             
         }
     }
     
     //REQUEST    
-    public void obtaingResearch(MSNAgent myAgent, GuiCommandListener menuGui,String research){
+    public void obtaingResearch(MSNAgent myAgent, GuiManager menuGui,String research){
         //Profile p = null;
         try {
             Runnable r = new RequestingResearch(myAgent, menuGui, research);
@@ -163,10 +161,10 @@ public class WallMng {
     class RequestingResearch implements Runnable {
 
         MSNAgent myAgent;
-        GuiCommandListener menuGui;
+        GuiManager menuGui;
         String research;
 
-        public RequestingResearch( MSNAgent myAgent, GuiCommandListener menuGui, String research) {
+        public RequestingResearch( MSNAgent myAgent, GuiManager menuGui, String research) {
             super();
             this.myAgent=myAgent;
             this.menuGui=menuGui;
@@ -175,8 +173,6 @@ public class WallMng {
 
         public void run() {
             MessageTicket notification=new MessageTicket(MSNAgent.SEARCH_REQUEST, MSNAgent.SEARCH_REQUEST ,research, new byte[0]);
-        	System.out.println("Search");
-        	System.out.println(notification);
             myAgent.sendMessageToAll(MSNAgent.SEARCH_REQUEST, MSNAgent.PROTOCOL_SEARCH, notification);
             
         }
@@ -186,13 +182,12 @@ public class WallMng {
 //RESPONSE    
     public void sendWallTo(String destination, MSNAgent myAgent){
         try {
-            Runnable r = new RequestingResponder(destination, myAgent, UtilityData.toByteArray(wall));
+            Runnable r = new RequestingResponder(destination, myAgent, UtilityData.toByteArray(getWall()));
             Thread thread = new Thread(r);
             thread.start();
             thread.join();
         } catch (IOException ex) {
             ex.printStackTrace();
-            System.out.println("ERROR Profile UtilityData.toByteArray(Profile.this)");
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         }
@@ -218,9 +213,8 @@ public class WallMng {
     }
     
   //RESPONSE    
-    public void sendFileTo(String destination, MSNAgent myAgent,String path){
+    public void sendFileTo(String destination, MSNAgent myAgent,String path) throws IOException{
         try {
-        	System.out.println("path: "+path);
             Runnable r = new RequestingFileResponder(destination, myAgent, Navigator.getFileInBytes(path), path);
             Thread thread = new Thread(r);
             thread.start();
@@ -254,10 +248,13 @@ public class WallMng {
     //RESPONSE    
     public void sendResearchTo(String destination, MSNAgent myAgent,String research){
         try {
-            Runnable r = new RequestingSearchResponder(destination, myAgent, UtilityData.toByteArray(WallMng.wallFromSearch(destination, research)), research);
-            Thread thread = new Thread(r);
-            thread.start();
-            thread.join();
+        	Wall wallData=WallMng.wallFromSearch(myAgent.getLocalName(), research);
+        	if (wallData.getWallMessages().size()>0){
+        		Runnable r = new RequestingSearchResponder(destination, myAgent, UtilityData.toByteArray(wallData), research);
+        		Thread thread = new Thread(r);
+        		thread.start();
+        		thread.join();
+        	}
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         } catch (IOException e) {

@@ -143,25 +143,20 @@ public class Navigator {
         return fis;
     }
     
-    public static byte[] getFileInBytes(String path) {
+    public static byte[] getFileInBytes(String path) throws IOException {
     	byte[] filebBs=new byte[0];
-    	System.out.println("getting file: "+path);
-        try {
-        	FileConnection fc = (FileConnection) Connector.open("file:///"+path , Connector.READ_WRITE);
-        	if(fc.exists()) 
-            { 
-        		System.out.println("File Exist: ");
-                filebBs=new byte[(int)fc.fileSize()]; 
-                InputStream is=fc.openInputStream(); 
-                is.read(filebBs, 0, filebBs.length); 
-                is.close();
-                fc.close(); 
-            }   
-            
-        } catch (IOException ex) {
-            ex.printStackTrace();
+    	FileConnection fc = (FileConnection) Connector.open("file:///"+path , Connector.READ_WRITE);
+    	if(fc.exists()) 
+        { 
+            filebBs=new byte[(int)fc.fileSize()]; 
+            InputStream is=fc.openInputStream(); 
+            is.read(filebBs, 0, filebBs.length); 
+            is.close();
+            fc.close(); 
+        }else{
+        	throw new IOException("File not found");
         }
-        System.out.println("fileBS: "+filebBs.length);
+      
         return filebBs;
     }
     

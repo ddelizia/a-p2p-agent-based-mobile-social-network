@@ -44,6 +44,11 @@ public class Profile {
     	return nickname;
     }
 
+	public String toString() {
+		return "Profile [img=" + img + ", name=" + name + ", nickname="
+				+ nickname + ", surname=" + surname + "]";
+	}
+
 
 
 

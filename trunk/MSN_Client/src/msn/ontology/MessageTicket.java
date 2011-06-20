@@ -73,7 +73,6 @@ public class MessageTicket implements Concept {
 			else
 				data=Base64.decode(d);
 		} catch (IOException e) {
-			System.out.println("Error in base64 decoding");
 			e.printStackTrace();
 		}
     }
@@ -239,6 +238,8 @@ public class MessageTicket implements Concept {
 			s=content + " is now your friend";
 		else if (type.equals(MSNAgent.FRIEND_DELETE))
 			s=content + " deleted you from friend his list";
+		else if (type.equals(MSNAgent.ERROR_FILE))
+			s="The file: "+content+ " does not exists anymore on the friend device";
 		return s;
 	}
 	

@@ -6,7 +6,7 @@ package msn.client;
 import msn.client.behaviours.AccessBehaviour;
 import msn.client.behaviours.ReceiveBehaviour;
 import msn.client.behaviours.SendBehaviour;
-import msn.client.gui.GuiCommandListener;
+import msn.client.gui.GuiManager;
 import msn.client.managers.DiscoveryMNG;
 import msn.client.managers.FriendsMNG;
 import msn.client.managers.ProfileMng;
@@ -34,6 +34,7 @@ public class MSNAgent extends Agent {
 	public static final String PROTOCOL_PROFILE="__PROTOCOL_PROFILE__";
 	public static final String PROTOCOL_WALLFILE="__PROTOCOL_WALLFILE__";
 	public static final String PROTOCOL_SEARCH = "__PROTOCOL_SEARCH__";
+	public static final String PROTOCOL_ERROR = "__PROTOCOL_ERROR__";
 	
 	public static final String FRIEND_REQUEST="__FRIEND_REQUEST__";
 	public static final String FRIEND_ACCEPTATION="__FRIEND_ACCEPTATION__";
@@ -46,11 +47,12 @@ public class MSNAgent extends Agent {
 	public static final String WALLFILE_RESPONSE="__WALLFILE_RESPONSE__";
 	public static final String SEARCH_REQUEST="__SEARCH_REQUEST__";
 	public static final String SEARCH_RESPONSE="__SEARCH_RESPONSE__";
+	public static final String ERROR_FILE="__ERROR_FILE__";
 	
 	public static final String MANAGER_NAME = "manager";
 	
 	
-	private GuiCommandListener myGui;
+	private GuiManager myGui;
 	private Set participants = new SortedSetImpl();
 	private Codec codec = new SLCodec();
 	private Ontology msgonto = MSNOntology.getInstance();
@@ -79,7 +81,7 @@ public class MSNAgent extends Agent {
         profileMng.setProfile(ProfileMng.generateProfile(this.getLocalName(),true));
         wallMng = new WallMng();
         wallMng.setWall(WallMng.wallFromDb(this.getLocalName(), true));
-        myGui = new GuiCommandListener(this);
+        myGui = new GuiManager(this);
 		
 		// Add initial behaviours
 		addBehaviour(new AccessBehaviour(this,codec,msgonto));
@@ -105,7 +107,7 @@ public class MSNAgent extends Agent {
         arrayPartecipants=array;
     }
     
-    public GuiCommandListener getGui(){
+    public GuiManager getGui(){
     	return myGui;
     }
     
@@ -134,7 +136,6 @@ public class MSNAgent extends Agent {
     	String []friends=friendsMng.getFriends();
     	DiscoveryMNG dm=new DiscoveryMNG(this);
     	for (int i=0;i<friends.length;i++){
-    		System.out.println("Sending message to: "+friends[i]);
     		if (dm.getMap().containsKey(friends[i]))
     			sendMessage(friends[i], conversation,  protocol,  notification,true);
     	}
@@ -146,8 +147,6 @@ public class MSNAgent extends Agent {
 	    	ArrayList messages=MessageTicket.splitMessage(notification, 100000);
 	    	Iterator i=messages.iterator();
 	    	while (i.hasNext()){
-	    		System.out.println("Lanciamo il behaviour: "+dest);
-	    		//this.doWait(AP_MIN);
 	    		addBehaviour(new SendBehaviour(dest, this,this.codec,this.msgonto, conversation, protocol,(MessageTicket)i.next(),isRequest));
 	    	}
     	}else{

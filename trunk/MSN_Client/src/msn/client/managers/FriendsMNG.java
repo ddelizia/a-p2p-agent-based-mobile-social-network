@@ -86,8 +86,7 @@ public class FriendsMNG {
             dbd.closeRecordStore();
             
         } catch (Exception ex) {
-            System.out.println(ex.toString());
-            System.out.println("ERRORE getData");
+        	ex.printStackTrace();
         }
     }
 
@@ -137,7 +136,6 @@ public class FriendsMNG {
 
         while (enumTable.hasMoreElements()) {
             String s = (String) enumTable.nextElement();
-            System.out.println(s);
             byte[] b = s.getBytes();
             db.addRecord(b, 0, b.length);
             numberOfSavedElements++;
@@ -200,7 +198,6 @@ public class FriendsMNG {
         }
 
         public void run() {
-            //System.out.println("NotificationSender START");
             while (!threadStoped) {
                 try {
                     if (requestList.size() > 0) {
@@ -229,8 +226,7 @@ public class FriendsMNG {
                     }
 
                 } catch (InterruptedException ex) {
-                    System.out.println(ex.toString());
-                    System.out.println("ERRORE NotificationSender");
+                    ex.printStackTrace();
                 }
             }
         }
@@ -244,23 +240,19 @@ public class FriendsMNG {
         }
 
         public void run() {
-            //System.out.println("AcceptationSender START");
+            
             while (!threadStoped) {
                 try {
 
                     if (answersList.size() > 0) {
-                    	System.out.println("Just found a data in answers list!!!");
-                        int i = 0;
+                    	int i = 0;
                         Enumeration enumTable = answersList.elements();
                         while (enumTable.hasMoreElements()) {
                             String current = (String) enumTable.nextElement();
                             i++;
                             
-                            System.out.println("I want to send the acceptation to "+ current);
-
                             boolean connected = dm.getMap().contains(current);
                             if (connected) {
-                                System.out.println("Sending the acceptation... because is connected");
                                 myAgent.sendMessage(current,MSNAgent.FRIEND_ACCEPTATION, MSNAgent.PROTOCOL_FRIEND,new MessageTicket(myAgent.getLocalName(),MSNAgent.FRIEND_ACCEPTATION ,myAgent.getLocalName(), new byte[0]),false);
                                 answersList.remove(current);
                             }
@@ -277,8 +269,7 @@ public class FriendsMNG {
                     }
 
                 } catch (InterruptedException ex) {
-                    System.out.println(ex.toString());
-                    System.out.println("ERRORE AcceptationSender");
+                    ex.printStackTrace();
                 }
             }
         }
@@ -292,23 +283,19 @@ public class FriendsMNG {
         }
 
         public void run() {
-            //System.out.println("AcceptationSender START");
+            
             while (!threadStoped) {
                 try {
 
                     if (deleteList.size() > 0) {
-                    	System.out.println("Just found a data in answers list!!!");
                         int i = 0;
                         Enumeration enumTable = deleteList.elements();
                         while (enumTable.hasMoreElements()) {
                             String current = (String) enumTable.nextElement();
                             i++;
-                            
-                            System.out.println("I want to send the acceptation to "+ current);
 
                             boolean connected = dm.getMap().contains(current);
                             if (connected) {
-                                System.out.println("Sending the acceptation... because is connected");
                                 myAgent.sendMessage(current,MSNAgent.FRIEND_DELETE, MSNAgent.PROTOCOL_FRIEND,new MessageTicket(myAgent.getLocalName(),MSNAgent.FRIEND_DELETE ,myAgent.getLocalName(), new byte[0]),false);
                                 deleteList.remove(current);
                             }
@@ -325,8 +312,7 @@ public class FriendsMNG {
                     }
 
                 } catch (InterruptedException ex) {
-                    System.out.println(ex.toString());
-                    System.out.println("ERRORE AcceptationSender");
+                	ex.printStackTrace();
                 }
             }
         }

@@ -30,7 +30,7 @@ public class ReceiveBehaviour extends TickerBehaviour{
 	
 		public ReceiveBehaviour(Agent a) {
 			super(a,1000);
-			myAgent = (MSNAgent)a;
+			agent = (MSNAgent)a;
 			template=MessageTemplate.MatchReceiver(new AID []{myAgent.getAID()});
 			buffers=new HashMap();
 		}
@@ -41,20 +41,32 @@ public class ReceiveBehaviour extends TickerBehaviour{
 	        
 	        
 			if (msg != null) {
+				
+				String conv=msg.getConversationId();
+		    	MessageTicket n=new MessageTicket();
+		    	try {
+					n.decodeFrames(msg.getContent());
+				} catch (FrameException e) {
+					e.printStackTrace();
+				}
+				String sender=msg.getSender().getLocalName();
+				
 	            if( msg.getPerformative() == ACLMessage.REQUEST){
 	            	
 	            	String prot=msg.getProtocol();
 
 	            	if (prot.equals(agent.PROTOCOL_FRIEND ))
-	            		agent.addBehaviour(new FriendBehaviour(msg));
+	            		agent.addBehaviour(new FriendBehaviour(n,conv));
 	            	else if (prot.equals(agent.PROTOCOL_WALL))
-	            		agent.addBehaviour(new WallBehaviour(msg));
+	            		agent.addBehaviour(new WallBehaviour(n,conv,sender));
 	            	else if (prot.equals(agent.PROTOCOL_PROFILE))
-	            		agent.addBehaviour(new ProfileBehaviour(msg));
+	            		agent.addBehaviour(new ProfileBehaviour(n,conv,sender));
 	            	else if (prot.equals(agent.PROTOCOL_WALLFILE))
-	            		agent.addBehaviour(new FileBehaviour(msg));
+	            		agent.addBehaviour(new FileBehaviour(n,conv,sender));
 	            	else if (prot.equals(agent.PROTOCOL_SEARCH))
-	            		agent.addBehaviour(new SearchBehaviour(msg));
+	            		agent.addBehaviour(new SearchBehaviour(n,conv,sender));
+	            	else if (prot.equals(agent.PROTOCOL_ERROR))
+	            		agent.addBehaviour(new ErrorBehaviour(n,conv));
 	                else 
 	                	agent.handleUnexpected(msg);
 	            }
@@ -63,15 +75,17 @@ public class ReceiveBehaviour extends TickerBehaviour{
 	            	String prot=msg.getProtocol();
 
 	            	if (prot.equals(agent.PROTOCOL_FRIEND ))
-	            		agent.addBehaviour(new FriendBehaviour(msg));
+	            		agent.addBehaviour(new FriendBehaviour(n,conv));
 	            	else if (prot.equals(agent.PROTOCOL_WALL))
-	            		agent.addBehaviour(new WallBehaviour(msg));
+	            		agent.addBehaviour(new WallBehaviour(n,conv,sender));
 	            	else if (prot.equals(agent.PROTOCOL_PROFILE))
-	            		agent.addBehaviour(new ProfileBehaviour(msg));
+	            		agent.addBehaviour(new ProfileBehaviour(n,conv,sender));
 	            	else if (prot.equals(agent.PROTOCOL_WALLFILE))
-	            		agent.addBehaviour(new FileBehaviour(msg));
+	            		agent.addBehaviour(new FileBehaviour(n,conv,sender));
 	            	else if (prot.equals(agent.PROTOCOL_SEARCH))
-	            		agent.addBehaviour(new SearchBehaviour(msg));
+	            		agent.addBehaviour(new SearchBehaviour(n,conv,sender));
+	            	else if (prot.equals(agent.PROTOCOL_ERROR))
+	            		agent.addBehaviour(new ErrorBehaviour(n,conv));
 	                else 
 	                	agent.handleUnexpected(msg);
 	            }
@@ -83,32 +97,38 @@ public class ReceiveBehaviour extends TickerBehaviour{
 	    }
 	    
 	    class FriendBehaviour extends OneShotBehaviour{
-	    	private ACLMessage msg;
-	    	public FriendBehaviour(ACLMessage msg){
-	    		this.msg=msg;
+	    	private String conv;
+	    	private MessageTicket n;
+	    	
+	    	public FriendBehaviour(MessageTicket n,String conv){
+	    		this.conv=conv;
+	    		this.n=n;
 	    	}
+	    	
 			public void action() {
-		    	String conv=msg.getConversationId();
-		    	MessageTicket n=new MessageTicket();
-		    	try {
-					n.decodeFrames(msg.getContent());
-				} catch (FrameException e) {
-				}
-	            if (conv.equals(MSNAgent.FRIEND_REQUEST)) {
+		    	
+	            
+				if (conv.equals(MSNAgent.FRIEND_REQUEST)) {
 	            	agent.getGui().addNotification(n, null);
-	            } else if(conv.equals(MSNAgent.FRIEND_ACCEPTATION)){
+	            } 
+				
+				else if(conv.equals(MSNAgent.FRIEND_ACCEPTATION)){
 	            	try {
 	            		agent.getGui().addNotification(n, n.getContent());
 	            		agent.getFriendsMng().friendAccepted(n.getContent());
 	            		agent.getFriendsMng().save();
 					} catch (Exception e) {
+						e.printStackTrace();
 					}
-	            } else if(conv.equals(MSNAgent.FRIEND_DELETE)){
+	            } 
+	            
+	            else if(conv.equals(MSNAgent.FRIEND_DELETE)){
 	            	try {
 	            		agent.getGui().addNotification(n, n.getContent());
 	            		agent.getFriendsMng().deleteFriend(n.getContent());
 	            		agent.getFriendsMng().save();
 					} catch (Exception e) {
+						e.printStackTrace();
 					}
 	            }
 			}
@@ -117,29 +137,28 @@ public class ReceiveBehaviour extends TickerBehaviour{
 	    
 	    
 	    class ProfileBehaviour extends OneShotBehaviour{
-	    	private ACLMessage msg;
-	    	public ProfileBehaviour(ACLMessage msg){
-	    		this.msg=msg;
+	    	private String conv;
+	    	private MessageTicket n;
+	    	private String sender;
+	    	
+	    	public ProfileBehaviour(MessageTicket n,String conv,String sender){
+	    		this.conv=conv;
+	    		this.n=n;
+	    		this.sender=sender;
 	    	}
+	    	
 			public void action() {
-		    	String conv=msg.getConversationId();
-		    	MessageTicket n=new MessageTicket();
-		    	try {
-					n.decodeFrames(msg.getContent());
-				} catch (FrameException e) {
-					e.printStackTrace();
-				}
+				
 		    	if (conv.equals(MSNAgent.PROFILE_REQUEST)){
-		    		ProfileMng profManager=new ProfileMng();
-		    		profManager.setProfile(agent.getProfileMng().getProfile());
-		    		profManager.sendProfileTo(msg.getSender().getLocalName(), agent);
-	            } else if (conv.equals(MSNAgent.PROFILE_RESPONSE)){
+		    		agent.getProfileMng().sendProfileTo(sender, agent);
+	            } 
+		    	
+		    	else if (conv.equals(MSNAgent.PROFILE_RESPONSE)){
 	                Profile profile;
 	                try {
 						profile = UtilityData.fromByteArrayProfile(n.getData(),false);
 						agent.getGui().addNotification(n, profile);
 					} catch (IOException e) {
-						System.out.println("Profile send/receive error");
 						e.printStackTrace();
 					}
 	            }
@@ -148,36 +167,38 @@ public class ReceiveBehaviour extends TickerBehaviour{
 	    }
 	    
 	    class FileBehaviour extends OneShotBehaviour{
-	    	private ACLMessage msg;
-	    	public FileBehaviour(ACLMessage msg){
-	    		this.msg=msg;
+	    	private String conv;
+	    	private MessageTicket n;
+	    	private String sender;
+	    	
+	    	public FileBehaviour(MessageTicket n,String conv,String sender){
+	    		this.conv=conv;
+	    		this.n=n;
+	    		this.sender=sender;
 	    	}
 			public void action() {
-				String conv=msg.getConversationId();
-		    	MessageTicket n=new MessageTicket();
-		    	try {
-					n.decodeFrames(msg.getContent());
-				} catch (FrameException e) {
-					e.printStackTrace();
-				}
-		    	if (conv.equals(MSNAgent.WALLFILE_REQUEST)){
-		    		WallMng wallmng=new WallMng();
-		    		wallmng.setWall(agent.getWallMng().getWall());
-		    		wallmng.sendFileTo(msg.getSender().getLocalName(), agent,n.getContent());
-	            } else if (conv.equals(MSNAgent.WALLFILE_RESPONSE)){
-	            	
-	            	System.out.println(n.getNotificationKey());
+
+		    	
+				if (conv.equals(MSNAgent.WALLFILE_REQUEST)){
+					try {
+						agent.getWallMng().sendFileTo(sender, agent,n.getContent());
+					} catch (IOException e) {
+						System.out.println("file non trovato");
+						agent.sendMessage(sender, MSNAgent.ERROR_FILE, MSNAgent.PROTOCOL_ERROR, new MessageTicket(agent.getLocalName(), MSNAgent.ERROR_FILE,n.getContent(),new byte[0]), false);
+					}
+	            } 
+				
+				else if (conv.equals(MSNAgent.WALLFILE_RESPONSE)){
 	            	
 	            	Map buffer=null;
 	            	if (!buffers.containsKey(n.getNotificationKey())){
 	            		buffer=new HashMap();
-	            		buffers.put(n.getNotificationKey(), buffer);
+	            		putInBuffers(n.getNotificationKey(), buffer);
 	            	}else{
 	            		buffer=(Map)buffers.get(n.getNotificationKey());
 	            	}
-	            		
-	            	buffer.put(new Integer(n.getOrder()), n);
-	            	System.out.println("Adding: "+n.getOrder());
+	            	
+	            	putElementInBuffer(buffer,new Integer(n.getOrder()), n);
 	            	
 	            	if (buffer.size()==n.getTotal()){
 	            		MessageTicket not=MessageTicket.mergeMessages(buffer,n);
@@ -189,7 +210,6 @@ public class ReceiveBehaviour extends TickerBehaviour{
 			            	String filename=cont.substring(lastOcc+1);
 			            	Navigator.createFileOnMem(not.getData(), filename);
 						} catch (IOException e) {
-							System.out.println("WallFile send/receive error");
 							e.printStackTrace();
 						} catch (Exception e) {
 							e.printStackTrace();
@@ -200,30 +220,38 @@ public class ReceiveBehaviour extends TickerBehaviour{
 	    	
 	    }
 	    
+	    public synchronized void putInBuffers(Object key, Object value) {
+	    	buffers.put(key, value);
+		}
+	    public synchronized void putElementInBuffer(Map buffer, Object key, Object value) {
+	    	buffer.put(key, value);
+		}
+	    
+	    
 	    class SearchBehaviour extends OneShotBehaviour{
-	    	private ACLMessage msg;
-	    	public SearchBehaviour(ACLMessage msg){
-	    		this.msg=msg;
+	    	private String conv;
+	    	private MessageTicket n;
+	    	private String sender;
+	    	
+	    	public SearchBehaviour(MessageTicket n,String conv,String sender){
+	    		this.conv=conv;
+	    		this.n=n;
+	    		this.sender=sender;
 	    	}
+	    	
 			public void action() {
-		    	String conv=msg.getConversationId();
-		    	MessageTicket n=new MessageTicket();
-		    	try {
-					n.decodeFrames(msg.getContent());
-				} catch (FrameException e) {
-					e.printStackTrace();
-				}
-		    	if (conv.equals(MSNAgent.SEARCH_REQUEST)){
-		    		WallMng wallmng=new WallMng();
-		    		wallmng.setWall(agent.getWallMng().getWall());
-		    		wallmng.sendResearchTo(msg.getSender().getLocalName(), agent,n.getContent());
-	            } else if (conv.equals(MSNAgent.SEARCH_RESPONSE)){
+
+		    	
+				if (conv.equals(MSNAgent.SEARCH_REQUEST)){
+					agent.getWallMng().sendResearchTo(sender, agent,n.getContent());
+	            } 
+				
+				else if (conv.equals(MSNAgent.SEARCH_RESPONSE)){
 	            	Wall wall;
 					try {
 						wall = UtilityData.fromByteArrayWall(n.getData(),false);
 						agent.getGui().addNotification(n, wall);
 					} catch (IOException e) {
-						System.out.println("WallSearch send/receive error");
 						e.printStackTrace();
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -234,31 +262,46 @@ public class ReceiveBehaviour extends TickerBehaviour{
 	    }
 	    
 	    class WallBehaviour extends OneShotBehaviour{
-	    	private ACLMessage msg;
-	    	public WallBehaviour(ACLMessage msg){
-	    		this.msg=msg;
+	    	private String conv;
+	    	private MessageTicket n;
+	    	private String sender;
+	    	
+	    	public WallBehaviour(MessageTicket n,String conv,String sender){
+	    		this.conv=conv;
+	    		this.n=n;
+	    		this.sender=sender;
 	    	}
+	    	
 			public void action() {
-		    	String conv=msg.getConversationId();
-		    	MessageTicket n=new MessageTicket();
-		    	try {
-					n.decodeFrames(msg.getContent());
-				} catch (FrameException e) {
-					e.printStackTrace();
-				}
+
 		    	if (conv.equals(MSNAgent.WALL_REQUEST)){
-		    		WallMng wallmng=new WallMng();
-		    		wallmng.setWall(agent.getWallMng().getWall());
-		    		wallmng.sendWallTo(msg.getSender().getLocalName(), agent);
+		    		agent.getWallMng().sendWallTo(sender, agent);
 	            } else if (conv.equals(MSNAgent.WALL_RESPONSE)){
 	            	Wall wall;
 					try {
 						wall = UtilityData.fromByteArrayWall(n.getData(),false);
 						agent.getGui().addNotification(n, wall);
 					} catch (IOException e) {
-						System.out.println("Wall send/receive error");
 						e.printStackTrace();
 					}
+	            }
+			}
+	    	
+	    }
+	    
+	    class ErrorBehaviour extends OneShotBehaviour{
+	    	private String conv;
+	    	private MessageTicket n;
+	    	
+	    	public ErrorBehaviour(MessageTicket n,String conv){
+	    		this.conv=conv;
+	    		this.n=n;
+	    	}
+	    	
+			public void action() {
+
+		    	if (conv.equals(MSNAgent.ERROR_FILE)){
+		    		agent.getGui().addNotification(n, null);
 	            }
 			}
 	    	
