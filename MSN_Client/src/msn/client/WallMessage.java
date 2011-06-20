@@ -159,7 +159,7 @@ public class WallMessage {
     	try {
     		tagsString=st.nextToken(); 	
 		} catch (Exception e) {
-			System.out.println("No tags");
+			e.printStackTrace();
 		}
 		if (tagsString!=null){
 			StringTokenizer st1=new StringTokenizer(tagsString, ",");  	

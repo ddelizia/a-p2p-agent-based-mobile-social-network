@@ -52,13 +52,11 @@ public class SendBehaviour extends OneShotBehaviour {
 			encoded = o.encodeFrames();
 		} catch (FrameException e) {
 			e.printStackTrace();
-			System.out.println("Errore encoding");
 		}
 		msg.setContent(encoded);
 
 		msg.addReceiver(dest);
 		myAgent.send(msg);
 		
-		System.out.println("Data sent to "+dest);
     }
 } 

@@ -14,6 +14,8 @@ import javax.microedition.lcdui.Image;
 import javax.microedition.rms.RecordEnumeration;
 import javax.microedition.rms.RecordStore;
 import javax.microedition.rms.RecordStoreException;
+import javax.microedition.rms.RecordStoreFullException;
+import javax.microedition.rms.RecordStoreNotFoundException;
 
 import msn.client.Profile;
 import msn.client.WallMessage;
@@ -99,11 +101,9 @@ public class UtilityDatastore {
 
         } catch (RecordStoreException ex) {
             ex.printStackTrace();
-            System.out.println("ERROR loading profile image");
             return null;
         } catch (IOException ex) {
         	ex.printStackTrace();
-            System.out.println("ERROR en row data");
             return null;
 		}
         ProfileMng profileMng=new ProfileMng();
@@ -126,7 +126,6 @@ public class UtilityDatastore {
 
         try {
 
-            System.out.println("Saving profile");
             
             RecordStore db = RecordStore.openRecordStore(profile.getNickname()+"profile", true);
 
@@ -180,11 +179,9 @@ public class UtilityDatastore {
 
         } catch(IOException ex){
             ex.printStackTrace();
-            System.out.println("ERROR save profile IO");
             return false;
         }catch(RecordStoreException rse){
             rse.printStackTrace();
-            System.out.println("ERROR save profile RSE");
             return false;
         }
         return true;
@@ -192,9 +189,8 @@ public class UtilityDatastore {
 
     public static void initProfile(String dbname) {
     	
+    	
         try {
-
-            System.out.println("Saving profile");
             
             RecordStore db = RecordStore.openRecordStore(dbname+"profile", true);
             
@@ -205,7 +201,6 @@ public class UtilityDatastore {
 
         }catch(RecordStoreException rse){
             rse.printStackTrace();
-            System.out.println("ERROR save data init");
         }
     }
 
@@ -224,7 +219,6 @@ public class UtilityDatastore {
 	    	db.addRecord(b, 0, b.length);
 	    	db.closeRecordStore();
 		} catch (Exception e) {
-			System.out.println("ERROR in saving wall message");
 			e.printStackTrace();
 			return false;
 		} 
@@ -240,7 +234,6 @@ public class UtilityDatastore {
             dim=db.getNumRecords();
             db.closeRecordStore();     
     	} catch (Exception e) {
-			System.out.println("ERROR in loading all wall messages");
 			e.printStackTrace();
 			return new ArrayList();
 		}
@@ -255,16 +248,13 @@ public class UtilityDatastore {
             RecordStore db = RecordStore.openRecordStore(dbname + "wall", true);
             RecordEnumeration re=db.enumerateRecords(null,null, false);
             while (re.hasNextElement() && count<num){
-            	System.out.println("re.hasNextElement()");
             	byte[] record = re.nextRecord();
             	WallMessage wm=UtilityData.fromByteArrayWallMessage(record);
-            	System.out.println(wm);
             	wallMessages.add(wm);
             	count++;
             }
             db.closeRecordStore();     
     	} catch (Exception e) {
-			System.out.println("ERROR in last wall messages");
 			e.printStackTrace();
 			return null;
 		}
@@ -279,7 +269,6 @@ public class UtilityDatastore {
             dim=db.getNumRecords();
             db.closeRecordStore();     
     	} catch (Exception e) {
-			System.out.println("ERROR in loading all wall messages");
 			e.printStackTrace();
 			return new ArrayList();
 		}
@@ -294,16 +283,13 @@ public class UtilityDatastore {
             RecordStore db = RecordStore.openRecordStore(dbname + "wall", true);
             RecordEnumeration re=db.enumerateRecords(new WallMessageFilter(tags),null, false);
             while (re.hasNextElement() && count<num){
-            	System.out.println("re.hasNextElement()");
             	byte[] record = re.nextRecord();
             	WallMessage wm=UtilityData.fromByteArrayWallMessage(record);
-            	System.out.println(wm);
             	wallMessages.add(wm);
             	count++;
             }
             db.closeRecordStore();     
     	} catch (Exception e) {
-			System.out.println("ERROR in last wall messages");
 			e.printStackTrace();
 			return null;
 		}
