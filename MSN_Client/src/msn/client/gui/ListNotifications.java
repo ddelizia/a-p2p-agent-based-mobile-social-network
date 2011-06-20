@@ -58,7 +58,7 @@ public class ListNotifications extends List {
 		} catch (IOException e) {
 			alert = new Alert("Notification","You got a new notification: "+n.translate(),null,AlertType.CONFIRMATION);
 		}
-		GuiCommandListener cl=(GuiCommandListener)commandListener;
+		GuiManager cl=(GuiManager)commandListener;
 		cl.showAlert(alert);
 	}
 	
@@ -76,8 +76,6 @@ public class ListNotifications extends List {
 		Object o=al.get(2);
 		
 		String cont=(String)al.get(1);
-
-        System.out.println("ELEMENT TO SHOW "+type+" "+cont);
 		
 		if (type.equals(MSNAgent.WALL_RESPONSE)){
 			Wall w=(Wall)o;

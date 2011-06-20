@@ -58,7 +58,6 @@ public class FormWallInsert extends Form {
         StringTokenizer st=new StringTokenizer(tags,",");
         while (st.hasMoreTokens()){
         	String tok=st.nextToken();
-        	System.out.println(tok);
             wm.addTag(tok);
         }
         return wm;

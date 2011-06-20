@@ -53,13 +53,10 @@ public class GuiManager implements CommandListener {
     }
     
     public GuiManager(MSNAgent a){
-    	System.out.println("APPLICATION GUI MANAGER STARTED");
 
-        myAgent = a;
-        
-        //mngs init
-        
-        
+       
+    	myAgent = a;
+
         getNewListFileSystem();
 
         //form init
@@ -79,12 +76,22 @@ public class GuiManager implements CommandListener {
 		// GENERAL COMMANDS
 		// -----------------------------------------------------------------
 		if (c == getBackCmd()) {
-			if (d instanceof ListFileSystem && displayableBeforFS == formProfile)
+			if (d instanceof ListFileSystem && displayableBeforFS == formProfile){
+				displayableBeforFS=null;
 				Display.getDisplay(Agent.midlet).setCurrent(formProfile);
-			else if (d instanceof ListFileSystem && displayableBeforFS == formWallInsert)
+			}
+			else if (d instanceof ListFileSystem && displayableBeforFS == formWallInsert){
+				displayableBeforFS=null;
 				Display.getDisplay(Agent.midlet).setCurrent(formWallInsert);
-			else if ( (d instanceof FormWall || d instanceof FormProfile) && displayableBeforFS == listNotifications)
+			}
+			else if ( (d instanceof FormWall || d instanceof FormProfile) && displayableBeforFS == listNotifications){
+				displayableBeforFS=null;
 				Display.getDisplay(Agent.midlet).setCurrent(listNotifications);
+			}
+			else if ( d instanceof ListNotifications && displayableBeforFS == listNotifications){
+				displayableBeforFS=null;
+				switchToPreviousDisplayable();
+			}
 			else if (d==formWallInsert)
 				Display.getDisplay(Agent.midlet).setCurrent(formWall);
 			else
@@ -256,7 +263,6 @@ public class GuiManager implements CommandListener {
 						myAgent.getFriendsMng().acceptFriends(content);
 						myAgent.getFriendsMng().save();
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -302,10 +308,8 @@ public class GuiManager implements CommandListener {
         clearMain();
         try {
         	myAgent.getFriendsMng().save();
-            System.out.println("Friends saved");
         } catch (Exception ex) {
             ex.printStackTrace();
-            System.out.println("Some problem on saving");
         }
         formMain.append(new StringItem(null, "Exiting. Please wait..."));
     }
@@ -372,27 +376,6 @@ public class GuiManager implements CommandListener {
 	public void addNotification(MessageTicket n, Object o){
 		listNotifications.addElement(n, o);
 	}
-
-//ELEMENTS GETTERS
-	/*
-	public Wall getMyWall(){
-		return wall.getWall();
-	}
-	
-	public Profile getMyProfile(){
-		return profileMng.getProfile();
-	}
-	
-	public FriendsMNG getMyFriendMNG(){
-		return friendsMng;
-	}
-
-
-	
-	public String[] getFriends(){
-		return friendsMng.getFriends();
-	}
-	*/
 	
 
 }
