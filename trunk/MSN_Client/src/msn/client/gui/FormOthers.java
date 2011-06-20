@@ -39,10 +39,7 @@ public class FormOthers extends Form {
         this.setCommandListener(commandListener);
         
         partecipants = new ChoiceGroup("List of Partecipants", ChoiceGroup.EXCLUSIVE);
-        System.out.println("Start discovery");
         String l[] = myAgent.getArrayPartecipants();
-        
-        System.out.println("# partecipanti: "+ l.length);
         
         for (int i = 0; i < l.length; i++) {
             if (!friendsMng.getFriendsMap().contains(l[i])) {

@@ -130,14 +130,11 @@ public class FormWall extends Form{
 		
 		String response="";
 		
-		System.out.println("Comprovando che siano uguali");
-		
 		Iterator it=wallMng.getWallMessages().iterator();
 		while (it.hasNext()){
 			WallMessage wm=(WallMessage) it.next();
 			if (wallS.equals(wm.toString())){
 				response=wm.getLink();
-				System.out.println("Uguali trovati: "+response);
 			}
 		}	
 		return response;

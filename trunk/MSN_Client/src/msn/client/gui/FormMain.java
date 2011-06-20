@@ -22,9 +22,9 @@ public class FormMain extends Form{
     public final String NOTIFICATION = "Notification";
     public final String WALL = "Wall";
     
-    private GuiCommandListener commandListener;
+    private GuiManager commandListener;
     
-    public FormMain(GuiCommandListener cl, MSNAgent a, Command search) {
+    public FormMain(GuiManager cl, MSNAgent a, Command search) {
 		super("" + a.getLocalName() + ": MSN. Main");
 		
 		commandListener=cl;

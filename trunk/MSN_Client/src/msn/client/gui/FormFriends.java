@@ -38,7 +38,6 @@ public class FormFriends extends Form{
 			online=Image.createImage("/res/green-light-38.png");
 			offline=Image.createImage("/res/red-light-38.png");
 		} catch (IOException e) {
-			System.out.println("Image not found");
 			e.printStackTrace();
 		}
 		
