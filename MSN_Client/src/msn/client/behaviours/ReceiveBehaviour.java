@@ -5,55 +5,71 @@ package msn.client.behaviours;
 import jade.content.frame.FrameException;
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
-import jade.core.behaviours.TickerBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import jade.util.Logger;
 import jade.util.leap.HashMap;
 import jade.util.leap.Map;
 
 import java.io.IOException;
+
 import msn.client.MSNAgent;
 import msn.client.Navigator;
 import msn.client.Profile;
 import msn.client.Wall;
-import msn.client.managers.ProfileMng;
-import msn.client.managers.WallMng;
 import msn.client.utility.UtilityData;
 import msn.ontology.MessageTicket;
 
-public class ReceiveBehaviour extends TickerBehaviour{
+public class ReceiveBehaviour extends CyclicBehaviour{
 
 		private MSNAgent agent;
 		private MessageTemplate template;
 		private Map buffers;
 	
 		public ReceiveBehaviour(Agent a) {
-			super(a,1000);
+			super(a);
 			agent = (MSNAgent)a;
-			template=MessageTemplate.MatchReceiver(new AID []{myAgent.getAID()});
+			MessageTemplate templateP1 = MessageTemplate.MatchProtocol(agent.PROTOCOL_FRIEND);
+			MessageTemplate templateP2 = MessageTemplate.MatchProtocol(agent.PROTOCOL_WALL);
+			MessageTemplate templateP3 = MessageTemplate.MatchProtocol(agent.PROTOCOL_ERROR);
+			MessageTemplate templateP4 = MessageTemplate.MatchProtocol(agent.PROTOCOL_PROFILE);
+			MessageTemplate templateP5 = MessageTemplate.MatchProtocol(agent.PROTOCOL_SEARCH);
+			MessageTemplate templateP6 = MessageTemplate.MatchProtocol(agent.PROTOCOL_WALLFILE);
+			MessageTemplate templateP1orP2=MessageTemplate.or(templateP1, templateP2);
+			MessageTemplate templateP3orP4=MessageTemplate.or(templateP3, templateP4);
+			MessageTemplate templateP5orP6=MessageTemplate.or(templateP5, templateP6);
+			MessageTemplate templateP1orP2orP3orP4=MessageTemplate.or(templateP1orP2, templateP3orP4);
+			MessageTemplate templateP1orP2orP3orP4orP5orP6=MessageTemplate.or(templateP1orP2orP3orP4, templateP5orP6);
+			template=MessageTemplate.and(MessageTemplate.MatchReceiver(new AID []{myAgent.getAID()}), templateP1orP2orP3orP4orP5orP6);
+			
 			buffers=new HashMap();
 		}
 	
-	    protected void onTick() {
+	    public void action() {
 	
 	        ACLMessage msg = myAgent.receive(template);
 	        
-	        
 			if (msg != null) {
-				
 				String conv=msg.getConversationId();
-		    	MessageTicket n=new MessageTicket();
-		    	try {
+		        MessageTicket n=new MessageTicket();
+		        try {
 					n.decodeFrames(msg.getContent());
 				} catch (FrameException e) {
 					e.printStackTrace();
 				}
-				String sender=msg.getSender().getLocalName();
-				
-	            if( msg.getPerformative() == ACLMessage.REQUEST){
+		        String sender=msg.getSender().getLocalName();
+	            
+		        if( msg.getPerformative() == ACLMessage.REQUEST){
+	            	
+	            	
+			    	
 	            	
 	            	String prot=msg.getProtocol();
+	            	
+	            	Logger logger = Logger.getMyLogger(this.getClass().getName());
+					logger.log(Logger.INFO, "-----Received "+prot+" Data at: "+System.currentTimeMillis()+" -Connected users: "+agent.getDiscoveryMng().getPartecipants().length);
 
 	            	if (prot.equals(agent.PROTOCOL_FRIEND ))
 	            		agent.addBehaviour(new FriendBehaviour(n,conv));
@@ -73,6 +89,8 @@ public class ReceiveBehaviour extends TickerBehaviour{
 	            else if( msg.getPerformative() == ACLMessage.INFORM){
 	            	
 	            	String prot=msg.getProtocol();
+	            	Logger logger = Logger.getMyLogger(this.getClass().getName());
+	            	logger.log(Logger.INFO, "-----Received "+prot+" Data at: "+System.currentTimeMillis()+" -Connected users: "+agent.getDiscoveryMng().getPartecipants().length);
 
 	            	if (prot.equals(agent.PROTOCOL_FRIEND ))
 	            		agent.addBehaviour(new FriendBehaviour(n,conv));
@@ -201,6 +219,10 @@ public class ReceiveBehaviour extends TickerBehaviour{
 	            	putElementInBuffer(buffer,new Integer(n.getOrder()), n);
 	            	
 	            	if (buffer.size()==n.getTotal()){
+	            		
+	            		Logger logger = Logger.getMyLogger(this.getClass().getName());
+	    				logger.log(Logger.INFO, "Received Last packet at: "+System.currentTimeMillis());
+	    				
 	            		MessageTicket not=MessageTicket.mergeMessages(buffer,n);
 	            		buffers.remove(n.getNotificationKey());
 						try {
@@ -306,4 +328,5 @@ public class ReceiveBehaviour extends TickerBehaviour{
 			}
 	    	
 	    }
+
 }

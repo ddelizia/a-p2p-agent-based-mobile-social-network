@@ -15,6 +15,7 @@ import javax.microedition.midlet.MIDletStateChangeException;
 import jade.MicroBoot;
 import jade.core.MicroRuntime;
 import jade.core.Agent;
+import jade.util.Logger;
 import jade.util.leap.Properties;
 
 public class Start extends MicroBoot implements CommandListener {
@@ -41,6 +42,8 @@ public class Start extends MicroBoot implements CommandListener {
 
 	public void commandAction(Command c, Displayable d) {
 		if (c == okCommand) {
+			Logger logger = Logger.getMyLogger(this.getClass().getName());
+			logger.log(Logger.INFO, "-----Access Request TIME: "+System.currentTimeMillis());
 			String name = tf.getString();
 			if (!checkName(name)) {
 				si.setText("The nickname must be composed of letters and digits only");

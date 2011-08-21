@@ -2,6 +2,9 @@ package msn.client.behaviours;
 
 //#J2SE_EXCLUDE_FILE
 //#PJAVA_EXCLUDE_FILE
+import java.util.Calendar;
+import java.util.Date;
+
 import jade.content.frame.FrameException;
 import jade.content.lang.Codec;
 import jade.content.onto.Ontology;
@@ -9,6 +12,7 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
+import jade.util.Logger;
 import msn.client.MSNAgent;
 import msn.ontology.MessageTicket;
 
@@ -45,6 +49,9 @@ public class SendBehaviour extends OneShotBehaviour {
 		msg.setConversationId(conversation);
 		msg.setProtocol(protocol);
 		
+		Logger logger = Logger.getMyLogger(this.getClass().getName());
+		logger.log(Logger.INFO, "-----Send "+protocol+" Data at: "+System.currentTimeMillis()+" -Connected users: "+myAgent.getDiscoveryMng().getPartecipants().length);
+    	
 		AID dest = new AID(destin, AID.ISLOCALNAME);
 
 		String encoded=null;
