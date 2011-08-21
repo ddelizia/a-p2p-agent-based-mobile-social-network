@@ -186,5 +186,9 @@ public class MSNAgent extends Agent {
 		this.wallMng = wallMng;
 	}
 
+	public Logger getLogger() {
+		return logger;
+	}
+
 	
 }

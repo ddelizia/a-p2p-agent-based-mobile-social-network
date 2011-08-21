@@ -64,6 +64,10 @@ public class AccessBehaviour extends CyclicBehaviour {
 							}
 						}
 						myAgent.setArrayPartecipants(myAgent.getParticipantNames());
+						
+						Logger logger = Logger.getMyLogger(this.getClass().getName());
+						logger.log(Logger.INFO, "-----In the network at: "+System.currentTimeMillis()+" -Connected users: "+myAgent.getDiscoveryMng().getPartecipants().length);
+						
 					}
 					if (p.getTypeName().equals(MSNOntology.LEFT)) {
 						// Get old participants, remove them from the list of participants
